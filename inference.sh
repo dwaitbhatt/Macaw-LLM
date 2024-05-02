@@ -1,5 +1,5 @@
 export NCCL_DEBUG=INFO
-export NCCL_SOCKET_IFNAME=eth1
+export NCCL_SOCKET_IFNAME=enp4s0
 export NCCL_IB_GID_INDEX=3
 export NCCL_IB_SL=3
 export NCCL_NET_GDR_READ=1
@@ -15,7 +15,7 @@ torchrun --nnodes 1 --nproc_per_node 1 \
     ${train_path} \
     --deepspeed $path/configs/deepspeed_config.json \
     --train_file $path/data/train_total_new_name.cache \
-    --model_name_or_path ${path} \
+    --model_name_or_path $path/mm_llms_trainer/pytorch_model.bin \
     --dataset_name vqa \
     --preprocessing_num_workers 16 \
     --per_device_train_batch_size 6 \
@@ -40,4 +40,4 @@ torchrun --nnodes 1 --nproc_per_node 1 \
     --ddp_timeout 3600 \
     --seed 1 \
     --gradient_checkpointing False \
-    --output_dir $path/trained_models/MM-LLMs/mm_llms_trainer/
+    --output_dir $path/mm_llms_trainer/

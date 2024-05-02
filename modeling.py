@@ -875,6 +875,7 @@ class MM_LLMs(PreTrainedModel):
         self.audio_encoder = WhisperModel(config.audio_config)
 
         self.llm = LlamaForCausalLM(config.llm_config)
+        # self.llm = LlamaModel.from_pretrained('facebook/llama-small')
 
         attn_dropout = 0.1
         is_add_bias_kv = True

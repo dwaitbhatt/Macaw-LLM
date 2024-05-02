@@ -13,6 +13,7 @@ import random
 import clip
 import torch
 from transformers import AutoFeatureExtractor, AutoModel, LlamaForCausalLM
+from pathlib import Path
 
 json_load = lambda x: json.load(codecs.open(x, 'r', encoding='utf-8'))
 json_dump = lambda d, p: json.dump(d, codecs.open(p, 'w', 'utf-8'), indent=2, ensure_ascii=False)
@@ -38,7 +39,7 @@ PROMPT_DICT = {
 }
 
 def preprocess_vqa2_to_val_dataset():
-    all_examples = json_load('data/vqa/mscoco_val2014_annotations.json')['annotations']
+    all_examples = json_load('data/vqa/mscoco_val2014_annotations_mod.json')['annotations']
     all_questions = json_load('data/vqa/OpenEnded_mscoco_val2014_questions.json')
     all_questions = {e['question_id']: [e['image_id'], e['question']] for e in all_questions['questions']}
 
@@ -94,8 +95,10 @@ def preprocess_avsd_to_val_dataset():
 
 
 def preprocess_vqa2_to_tensor_dataset(all_visual_names, tokenizer):
-    all_examples = json_load('data/vqa/mscoco_train2014_annotations.json')['annotations']
-    all_questions = json_load('data/vqa/OpenEnded_mscoco_train2014_questions.json')
+    # all_examples = json_load('data/vqa/mscoco_train2014_annotations.json')['annotations']
+    # all_questions = json_load('data/vqa/OpenEnded_mscoco_train2014_questions.json')
+    all_examples = json_load('data/vqa/mscoco_val2014_annotations_mod.json')['annotations']
+    all_questions = json_load('data/vqa/OpenEnded_mscoco_val2014_questions.json')
     all_questions = {e['question_id']: [e['image_id'], e['question']] for e in all_questions['questions']}
 
     max_length = 256
@@ -377,7 +380,8 @@ def resize_images():
 
 def preprocess_all_datasets():
     all_visual_names = json_load('data/all_visual_names.json')['dict']
-    tokenizer = AutoTokenizer.from_pretrained('trained_models/llama_tokenizer')
+    tokenizer = AutoTokenizer.from_pretrained('oobabooga/llama-tokenizer')
+    # tokenizer = AutoTokenizer.from_pretrained(Path('/home/dwait/acads/cse252d/Macaw-LLM/mm_llms_trainer/tokenizer.model'), local_files_only=True)
 
     # Chenyang: 2023-05-21, add special tokens
 
@@ -398,8 +402,8 @@ def preprocess_all_datasets():
     tokenizer.save_pretrained('trained_models/llama_tokenizer')
 
     all_image_data = preprocess_vqa2_to_tensor_dataset(all_visual_names, tokenizer)
-    all_tetx_data = preprocess_alpaca_to_tensor_dataset(tokenizer)
-    all_video_data = preprocess_avsd_to_tensor_dataset(all_visual_names, tokenizer)
+    # all_tetx_data = preprocess_alpaca_to_tensor_dataset(tokenizer)
+    # all_video_data = preprocess_avsd_to_tensor_dataset(all_visual_names, tokenizer)
 
     def draw_examples(lis, num):
         ri = draw_samples([i for i in range(len(lis))], num)
@@ -409,28 +413,46 @@ def preprocess_all_datasets():
 
     all_dataset = []
     i = 0
-    for a,b,c in zip(all_image_data, all_tetx_data, all_video_data):
+    # for a,b,c in zip(all_image_data, all_tetx_data, all_video_data):
+    #     if ra == None:
+    #         print(len(a), len(b), len(c))
+    #         ra = draw_examples(a, 50000)
+    #         rb = draw_examples(b, 50000)
+    #         rc = draw_examples(c, 50000)
+
+    #         a = [a[i] for i in ra]
+    #         b = [b[i] for i in rb]
+
+    #         c = [c[i] for i in rc]
+
+    #         new_lis = a + b + c
+    #         print(len(new_lis))
+    #         all_dataset.append(new_lis)
+    #     else:
+    #         print(len(a), len(b), len(c))
+    #         a = [a[i] for i in ra]
+    #         b = [b[i] for i in rb]
+
+    #         c = [c[i] for i in rc]
+    #         new_lis = a + b + c
+    #         print(len(new_lis))
+    #         all_dataset.append(new_lis)
+    #     i += 1
+    for a in all_image_data:
         if ra == None:
-            print(len(a), len(b), len(c))
-            ra = draw_examples(a, 50000)
-            rb = draw_examples(b, 50000)
-            rc = draw_examples(c, 50000)
+            print("len(a) =", len(a))
+            # TODO: Maybe modify to 150000 if error
+            ra = draw_examples(a, 50)
 
             a = [a[i] for i in ra]
-            b = [b[i] for i in rb]
 
-            c = [c[i] for i in rc]
-
-            new_lis = a + b + c
+            new_lis = a
             print(len(new_lis))
             all_dataset.append(new_lis)
         else:
-            print(len(a), len(b), len(c))
+            print("len(a) =", len(a))
             a = [a[i] for i in ra]
-            b = [b[i] for i in rb]
-
-            c = [c[i] for i in rc]
-            new_lis = a + b + c
+            new_lis = a
             print(len(new_lis))
             all_dataset.append(new_lis)
         i += 1
@@ -467,8 +489,8 @@ def combine_visual_and_audio_names():
                 _image_dir = _image_dir.replace(i_str, n_str)
 
             all_image_names.append(_image_dir)
-    add_image_names('data/vqa/mscoco_train2014_annotations.json')
-    add_image_names('data/vqa/mscoco_val2014_annotations.json')
+    # add_image_names('data/vqa/mscoco_train2014_annotations.json')
+    add_image_names('data/vqa/mscoco_val2014_annotations_mod.json')
 
     all_video_names = []
 
@@ -480,8 +502,8 @@ def combine_visual_and_audio_names():
         for ind, key in enumerate(tqdm(metadata)):
             all_video_names.append(key)
 
-    add_video_names(train_metadata_dir)
-    add_video_names(val_metadata_dir)
+    # add_video_names(train_metadata_dir)
+    # add_video_names(val_metadata_dir)
     all_names = all_image_names + all_video_names
 
     all_names_dict = {k:ind for ind, k in enumerate(all_names)}

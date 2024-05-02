@@ -437,9 +437,9 @@ def main():
     # download model & vocab.
 
     # load model
-    clip_config = CLIPConfig.from_pretrained('trained_models/clip_model')
-    whisper_config = WhisperConfig.from_pretrained('trained_models/whisper_model')
-    llm_config = AutoConfig.from_pretrained('trained_models/llama_model')
+    clip_config = CLIPConfig()
+    whisper_config = WhisperConfig() # .from_pretrained('trained_models/whisper_model')
+    llm_config = LlamaConfig() # AutoConfig.from_pretrained('trained_models/llama_model')
 
     model_config = MM_LLMs_Config(
     n_frames=model_args.n_frames, 

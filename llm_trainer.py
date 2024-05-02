@@ -157,13 +157,13 @@ def _transform(n_px):
         Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
     ])
 
-image_dir = 'data/avsd/frames/'
-audio_dir = 'data/avsd/audios/'
+# image_dir = 'data/avsd/frames/'
+# audio_dir = 'data/avsd/audios/'
 
 
-visual_name_dir = "data/all_visual_names_instruction.json"
-vname = json_load(visual_name_dir)['list']
-train_video_names = {'data': vname}
+# visual_name_dir = "data/all_visual_names_instruction.json"
+# vname = json_load(visual_name_dir)['list']
+# train_video_names = {'data': vname}
 
 preprocess = _transform(224)
 device = torch.device("cuda")
